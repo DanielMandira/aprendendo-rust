@@ -1,36 +1,24 @@
-use std::env; // Para ler o argumento do terminal
-use std::fs; // para ler o arquivo
+use std::thread;
+use std::time::Duration;
 
 fn main(){
-    // Coleta os argumentos em um Vetor (uma lista no Heap)
-    let args: Vec<String> = env::args().collect();
-
-    // O primeiro argumento (índice 0) é sempre o nome do próprio programa.
-    // Precisamos de pelo menos o arquivo (1) e a palavra (2).
-    if args.len() < 3 {
-        println!("Uso correto: cargo run -- <arquivo> <palavra>");
-        return;
-    }
-
-    let caminho = &args[1];
-    let busca = &args[2];
-
-    println!("Buscando por '{}' em '{}'...\n", busca, caminho);
-    match fs::read_to_string(caminho){
-        Ok(conteudo)=>{
-            let mut total_encontrados = 0;
-
-            for (num_linha, linha) in conteudo.lines().enumerate(){
-                if linha.contains(busca){
-                    println!("[Linha {}] {}\n", num_linha + 1, linha);
-                    total_encontrados += 1;
-                }
-                
-            }
-            println!("\nFim da busca. Encontramos {} ocorrências.", total_encontrados);
-
+    // Criamos uma nova thread (uma "Tarefa Paralela")
+    let tarefa_1 = thread::spawn(|| {
+        for i in 1..5 {
+            println!("Thread A: Analisando Log de Rede... {}", i);
+            thread::sleep(Duration::from_millis(5000)); // Simulando Carga
         }
-            Err(e) => println!("Erro ao abrir o arquivo: {}", e),
-        
-    }
+    });
+
+    let tarefa_2 = thread::spawn(|| {
+        for i in 1..5 {
+            println!("Thread B: Verificando Log de Segurança... {}", i);
+            thread::sleep(Duration::from_millis(7000)); // Simulando Carga
+        }
+    });
+
+    tarefa_1.join().unwrap(); // Espera a tarefa 1 terminar
+    tarefa_2.join().unwrap(); // Espera a tarefa 2 terminar
+
+    println!("Todos os logs foram processados simultaneamente!!");
 }
